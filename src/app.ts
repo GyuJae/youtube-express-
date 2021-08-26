@@ -26,12 +26,12 @@ class App {
     });
   }
 
+  // useNewUrlParser: true,
+  // useUnifiedTopology: true,
+
   public listen() {
     mongoose
-      .connect("mongodb://127.0.0.1:27017/youtube-express", {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      })
+      .connect("mongodb://127.0.0.1:27017/youtube-express")
       .then(() => {
         this.app.listen(this.port, () => {
           console.log(

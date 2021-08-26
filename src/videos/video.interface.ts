@@ -7,7 +7,7 @@ interface Meta {
   rating: number;
 }
 
-interface Video {
+interface IVideo {
   title: string;
   description: string;
   createdAt: Date;
@@ -15,4 +15,4 @@ interface Video {
   meta: Meta;
 }
 
-export default Video;
+export default IVideo;

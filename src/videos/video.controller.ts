@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 import { Error, _AllowStringsForIds } from "mongoose";
 import VideoModel from "./model/video.model";
-import Video from "./video.interface";
+import IVideo from "./video.interface";
 
 class VideoController {
   public path = "/videos";
@@ -52,7 +52,7 @@ class VideoController {
       const {
         params: { id },
       } = req;
-      await VideoModel.findById(id, (error: Error, video: Video) => {
+      await VideoModel.findById(id, (error: Error, video: IVideo) => {
         if (error) {
           return res.json(error);
         }
@@ -100,7 +100,7 @@ class VideoController {
       const {
         query: { keyword },
       } = req;
-      let videos: Video[] = [];
+      let videos: IVideo[] = [];
       if (keyword) {
         videos = await VideoModel.find({
           title: {

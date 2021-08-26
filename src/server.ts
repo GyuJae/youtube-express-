@@ -1,3 +1,4 @@
+import "dotenv/config";
 import App from "./app";
 import UserController from "./users/user.controller";
 import VideoController from "./videos/video.controller";
