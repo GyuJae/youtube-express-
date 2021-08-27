@@ -2,10 +2,11 @@ import express, { Request, Response } from "express";
 import UserModel from "./model/user.model";
 import jwt from "jsonwebtoken";
 import passport from "passport";
+import { AuthMiddleware } from "./user.middleware";
 const KakaoStrategy = require("passport-kakao").Strategy;
 
-//_id : 612653107defb907b5686d59
-//token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYxMjY1MzEwN2RlZmI5MDdiNTY4NmQ1OSIsImlhdCI6MTYyOTk3ODY5M30.W79okqhYG5B7sCwnLWwyOCBJYD2Q1xYDLAlIecawXB0
+//token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYxMjhhMmViOTllZGFlY2ViNzRhMmVmYiIsImlhdCI6MTYzMDA1MzExOX0.X3N3xYsim3nPZR4pTElE2BMzI-5IOCy-NLeGMgaPnYI
+// id: 6128a2eb99edaeceb74a2efb
 
 class UserController {
   public path = "/users";
@@ -25,32 +26,30 @@ class UserController {
           console.log(profile);
           console.log(accessToken);
           console.log(refreshToken);
-          return res.json({
-            accessToken,
-            refreshToken,
-            profile,
-          });
         }
       )
     );
   }
 
   public intializeRoutes() {
-    this.router.post(this.path + "/join", this.join);
     this.router.get(this.path + "/search", this.search);
+    this.router.post(this.path + "/join", this.join);
     this.router.post(this.path + "/login", this.login);
     this.router.get(
       this.path + "/kakao-login",
-      passport.Authenticator("kakao", {
-        failureRedirect: "/login",
-      })
+      passport.authenticate("kakao", {
+        failureRedirect: `#!/login`,
+      }),
+      this.kakaoLogin
     );
-    this.router.post(this.path + "/edit", this.edit);
-    this.router.post(this.path + "/remove", this.remove);
+    this.router.post(this.path + "/remove/:id", AuthMiddleware, this.remove);
+    this.router.post(this.path + "/edit/:id", AuthMiddleware, this.edit);
     this.router.get(this.path + "/:id", this.findById);
   }
 
-  kakaoLogin = async (req: Request, res: Response) => {};
+  kakaoLogin = async (req: Request, res: Response) => {
+    return res.json(req);
+  };
 
   join = async (req: Request, res: Response) => {
     try {
@@ -62,9 +61,15 @@ class UserController {
         password,
         username,
       });
-      return res.send(user);
+      return res.send({
+        ok: true,
+        user,
+      });
     } catch (error) {
-      return res.json(error);
+      return res.json({
+        ok: false,
+        error,
+      });
     }
   };
 
@@ -74,10 +79,16 @@ class UserController {
         body: { username },
       } = req;
       console.log(req.headers);
-      const user = await UserModel.find({ username });
-      return res.json(user);
+      const users = await UserModel.find({ username });
+      return res.json({
+        ok: true,
+        users,
+      });
     } catch (error) {
-      return res.json(error);
+      return res.json({
+        ok: false,
+        error,
+      });
     }
   };
 
@@ -101,11 +112,13 @@ class UserController {
       const user = await UserModel.findOne({ email });
       if (!user) {
         return res.json({
+          ok: false,
           error: "This email does not exist",
         });
       }
       if (user.password !== password) {
         return res.json({
+          ok: false,
           error: "wrong password",
         });
       }
@@ -114,18 +127,46 @@ class UserController {
         process.env.JWT_PRIVATE_KEY || ""
       );
       return res.json({
+        ok: true,
         token,
       });
     } catch (error) {
-      return res.json(error);
+      return res.json({ error });
     }
   };
 
-  edit = (req: Request, res: Response) => {
-    return res.send("edit");
+  edit = async (req: Request, res: Response) => {
+    try {
+      const {
+        params: { id },
+        body: editInput,
+      } = req;
+      await UserModel.findByIdAndUpdate(id, editInput);
+      return res.json({
+        ok: true,
+      });
+    } catch (error) {
+      return res.json({
+        ok: false,
+        error,
+      });
+    }
   };
-  remove = (req: Request, res: Response) => {
-    return res.send("remove");
+  remove = async (req: Request, res: Response) => {
+    try {
+      const {
+        params: { id },
+      } = req;
+      await UserModel.findByIdAndDelete(id);
+      return res.json({
+        ok: true,
+      });
+    } catch (error) {
+      return res.json({
+        ok: false,
+        error,
+      });
+    }
   };
 }
 

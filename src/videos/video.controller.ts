@@ -2,6 +2,8 @@ import express, { Request, Response } from "express";
 import { Error, _AllowStringsForIds } from "mongoose";
 import VideoModel from "./model/video.model";
 import IVideo from "./video.interface";
+import { VideoAuthMiddleware, VideoUploadMiddleware } from "./video.middleware";
+import { findUserByToken } from "../utils/findUserByToken";
 
 class VideoController {
   public path = "/videos";
@@ -14,36 +16,62 @@ class VideoController {
   public intializeRoutes() {
     this.router.get(this.path + "/trending", this.trending);
     this.router.get(this.path + "/search", this.search);
-    this.router.post(this.path + "/upload", this.upload);
+    this.router.post(this.path + "/upload", VideoUploadMiddleware, this.upload);
     this.router.get(this.path + "/:id", this.see);
-    this.router.post(this.path + "/:id/edit", this.edit);
-    this.router.post(this.path + "/:id/delete", this.deleteVideo);
+    this.router.post(this.path + "/:id/edit", VideoAuthMiddleware, this.edit);
+    this.router.post(
+      this.path + "/:id/delete",
+      VideoAuthMiddleware,
+      this.deleteVideo
+    );
   }
 
   trending = async (req: Request, res: Response) => {
     try {
       await VideoModel.find({}, (error, videos) => {
         if (error) {
-          return res.json(error);
+          return res.json({
+            ok: false,
+            error,
+          });
         }
-        return res.json(videos);
+        return res.json({
+          ok: true,
+          videos,
+        });
       });
     } catch (error) {
-      return res.json(error);
+      return res.json({
+        ok: false,
+        error,
+      });
     }
   };
 
   upload = async (req: Request, res: Response) => {
     try {
-      const { title, description, hashtags } = req.body;
+      const { title, description, hashtags, videoFile } = req.body;
+      const token = req.headers["token"];
+      const owner = await findUserByToken(token as string);
+      if (!owner) {
+        return res.json({ ok: false, error: "Auth error" });
+      }
       const video = await VideoModel.create({
+        videoFile,
         title,
         description,
+        ownerId: owner._id,
         hashtags: hashtags.split(" ").map((hashtag: string) => `#${hashtag}`),
       });
-      return res.json(video);
+      return res.json({
+        ok: true,
+        video,
+      });
     } catch (error) {
-      return res.status(404).json(error);
+      return res.status(404).json({
+        ok: false,
+        error,
+      });
     }
   };
 
@@ -54,12 +82,21 @@ class VideoController {
       } = req;
       await VideoModel.findById(id, (error: Error, video: IVideo) => {
         if (error) {
-          return res.json(error);
+          return res.json({
+            ok: false,
+            error,
+          });
         }
-        return res.json(video);
+        return res.json({
+          ok: true,
+          video,
+        });
       });
     } catch (error) {
-      return res.json(error);
+      return res.json({
+        ok: false,
+        error,
+      });
     }
   };
 
@@ -71,15 +108,19 @@ class VideoController {
       const {
         body: { title, description, hashtags },
       } = req;
-      const video = await VideoModel.findByIdAndUpdate(id, {
-        title,
-        description,
-        hashtags: hashtags.split(" ").map((hashtag: string) => `#${hashtag}`),
+      // await VideoModel.findByIdAndUpdate(id, {
+      //   title,
+      //   description,
+      //   hashtags: hashtags.split(" ").map((hashtag: string) => `#${hashtag}`),
+      // });
+      return res.json({
+        ok: true,
       });
-      return res.json(video);
     } catch (error) {
-      console.log(error);
-      return res.json(error);
+      return res.json({
+        ok: false,
+        error,
+      });
     }
   };
 
@@ -88,10 +129,15 @@ class VideoController {
       const {
         params: { id },
       } = req;
-      const video = await VideoModel.findByIdAndDelete(id);
-      return res.json(video);
+      await VideoModel.findByIdAndDelete(id);
+      return res.json({
+        ok: true,
+      });
     } catch (error) {
-      return res.json(error);
+      return res.json({
+        ok: false,
+        error,
+      });
     }
   };
 
@@ -108,9 +154,15 @@ class VideoController {
           },
         });
       }
-      return res.json(videos);
+      return res.json({
+        ok: true,
+        videos,
+      });
     } catch (error) {
-      return res.json(error);
+      return res.json({
+        ok: false,
+        error,
+      });
     }
   };
 }

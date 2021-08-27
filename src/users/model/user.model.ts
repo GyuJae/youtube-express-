@@ -5,6 +5,7 @@ const schema = new Schema<IUser>({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   username: { type: String, required: true, unique: true },
+  avatarUrl: { type: String },
 });
 
 const UserModel = model<IUser>("User", schema);
