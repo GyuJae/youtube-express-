@@ -14,7 +14,7 @@ class VideoController {
   }
 
   public intializeRoutes() {
-    this.router.get(this.path + "/trending", this.trending);
+    this.router.get(this.path, this.trending);
     this.router.get(this.path + "/search", this.search);
     this.router.post(this.path + "/upload", VideoUploadMiddleware, this.upload);
     this.router.get(this.path + "/:id", this.see);
@@ -28,17 +28,10 @@ class VideoController {
 
   trending = async (req: Request, res: Response) => {
     try {
-      await VideoModel.find({}, (error, videos) => {
-        if (error) {
-          return res.json({
-            ok: false,
-            error,
-          });
-        }
-        return res.json({
-          ok: true,
-          videos,
-        });
+      const videos = await VideoModel.find({});
+      return res.json({
+        ok: true,
+        videos,
       });
     } catch (error) {
       return res.json({

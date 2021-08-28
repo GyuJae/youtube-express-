@@ -8,7 +8,6 @@ interface Meta {
 }
 
 interface IVideo {
-  videoFile: string;
   ownerId: string;
   title: string;
   description: string;

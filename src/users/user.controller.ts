@@ -78,7 +78,6 @@ class UserController {
       const {
         body: { username },
       } = req;
-      console.log(req.headers);
       const users = await UserModel.find({ username });
       return res.json({
         ok: true,
@@ -152,6 +151,7 @@ class UserController {
       });
     }
   };
+
   remove = async (req: Request, res: Response) => {
     try {
       const {
