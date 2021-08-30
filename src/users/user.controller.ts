@@ -125,6 +125,7 @@ class UserController {
         { id: user._id },
         process.env.JWT_PRIVATE_KEY || ""
       );
+
       return res.json({
         ok: true,
         token,
