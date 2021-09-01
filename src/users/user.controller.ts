@@ -118,7 +118,7 @@ class UserController {
       if (user.password !== password) {
         return res.json({
           ok: false,
-          error: "wrong password",
+          error: "Wrong password",
         });
       }
       const token = jwt.sign(

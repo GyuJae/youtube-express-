@@ -1,6 +1,7 @@
 import express from "express";
 import bodyParser from "body-parser";
 import mongoose from "mongoose";
+import cors from "cors";
 
 class App {
   public app: express.Application;
@@ -18,6 +19,7 @@ class App {
     this.app.use(bodyParser.json());
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
+    this.app.use(cors());
   }
 
   private initializeControllers(controllers: any[]) {
