@@ -23,6 +23,7 @@ export const AuthMiddleware = async (
     }
   }
   return res.json({
+    ok: false,
     error: "You don't have access",
   });
 };

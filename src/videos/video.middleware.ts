@@ -26,6 +26,7 @@ export const VideoAuthMiddleware = async (
     }
   }
   return res.json({
+    ok: false,
     error: "You don't have access",
   });
 };
@@ -50,6 +51,7 @@ export const VideoUploadMiddleware = async (
     }
   }
   return res.json({
+    ok: false,
     error: "You don't have access",
   });
 };

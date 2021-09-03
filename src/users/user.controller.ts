@@ -5,9 +5,6 @@ import passport from "passport";
 import { AuthMiddleware } from "./user.middleware";
 const KakaoStrategy = require("passport-kakao").Strategy;
 
-//token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYxMjhhMmViOTllZGFlY2ViNzRhMmVmYiIsImlhdCI6MTYzMDA1MzExOX0.X3N3xYsim3nPZR4pTElE2BMzI-5IOCy-NLeGMgaPnYI
-// id: 6128a2eb99edaeceb74a2efb
-
 class UserController {
   public path = "/users";
   public router = express.Router();
